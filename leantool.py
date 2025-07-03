@@ -235,10 +235,10 @@ Alternatively, without setting the `sorry_hammer` flag, you could manually repla
                     cf_result = await check_lean_code(code, sorry_hammer=False)
                     if not cf_result['success']:
                         cf_out = "SorryHammer proved that the goal corresponding to the first sorry is false. The following is the proof of the negation:"
-                    if isinstance(result['output'],str):
-                        result['output']+='\n'+cf_out+'\n'+cf_result['output']
-                    else:
-                        result['output']+=[{'data':output}]+cf_result['output']
+                        if isinstance(result['output'],str):
+                            result['output']+='\n'+cf_out+'\n'+cf_result['output']
+                        else:
+                            result['output']+=[{'data':output}]+cf_result['output']
         return result
 
 
