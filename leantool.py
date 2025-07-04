@@ -187,7 +187,7 @@ class LoadSorry:
 
 
 class SorryHammer:
-    def __init__(self, tactic = 'hammer', imports = 'import Hammer\n', greedy=False, try_negation=True):
+    def __init__(self, tactic = ['omega','hammer'], imports = 'import Hammer\n', greedy=False, try_negation=True):
         self.tactic = tactic if isinstance(tactic, str) else "first | " + " | ".join(['('+t+')' for t in tactic])
         self.imports = imports
         self.greedy = greedy
