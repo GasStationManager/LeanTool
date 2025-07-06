@@ -2,11 +2,33 @@
 
 # Available utilities
 
-- MCP tool that takes Lean 4 source code and checks it with the Lean executable
+- MCP tool check_lean that takes Lean 4 source code and checks it with the Lean executable
 - pbtdp.py: command-line script, takes a filename containing Lean source code and a function signature, generate sample inputs and evaluates the function on those inputs.
   Usage: `poetry run python pbtdp.py <filename> <function signature> [--num_test=N]`
 
-# Development workflow for Lean 4 with dependent types and proofs
+
+# Development workflow
+
+- Similar to test-driven development, except that the test cases will be automatically generated 
+
+- Start with stub implementations, with sorrys in place of proofs.
+
+- Run the code through check_lean to verify syntax, and to extract the goals from sorrys.
+
+- Write the checks to guard each sorry, if they don’t exist yet. Ensure that the checks matches the goals extracted from the sorrys.
+
+- Run pbtdp.py. If errors are caught, identify which part of the code emitted the error messages, and the input that lead to the error.
+
+- Based on the above information, improve the implementation to address that error.
+
+- If the checks guarding a sorry passed the tests, go ahead and try to prove the goal. 
+  You may try hammer tactics including `omega`, `grind`, `hammer` (after import Hammer). 
+  You may also try `check_lean` with the `sorry_hammer` parameter set to true, which will try to replace the first sorry with a proof by hammer.
+
+- Repeat the above steps, until no more errors are caught by pbtdp.py, and all `sorry`s are replaced with proofs.
+
+
+# More detailed instructions and best practices
 
 1. **MCP tool usage**
    - Use `mcp__LeanTool__check_lean` to validate Lean syntax and extract proof goals from `sorry` statements
@@ -37,8 +59,41 @@
    return ResultType (by sorry)
    ```
 
-5. **Best practices**
+5. **Proving strategy**
+   - Start proving after implementation passes all tests
+   - Use condition introduction: `if h: cond` instead of `if cond` to get conditions in proof context
+   - Common effective tactics: `omega`, `linarith`, `simp`, `constructor`, `exact`
+   - For complex cases, use `by_cases` to split on conditions
+   - Use `rw` (rewrite) to substitute equalities in goals and hypotheses
+
+6. **Performance optimization**
+   - Remove runtime checks for proven cases to speed up testing
+   - Keep runtime checks only for remaining unproven cases during development
+   - Use descriptive error messages to identify which unproven case is reached
+
+7. **Best practices**
    - Runtime checks should exactly match the proof goals from sorries
    - Error messages should clearly indicate what condition failed
    - Increase test cases when needed to ensure coverage of all code paths
    - When using dependent types, include all proof arguments in testing signatures
+
+# Advanced workflow insights
+
+## Handling complex proof cases
+- **When a proof seems impossible**: Check if your implementation is doing the right thing
+- **Algorithm logic errors**: Sometimes failed proofs indicate the algorithm logic itself needs fixing, not just the proof
+- **Case analysis**: Use `by_cases h : condition` to split complex proofs into manageable subcases
+- **Structural reasoning**: For recursive functions on inductive types, reason about the structure (e.g., `max` of two values)
+
+## Successful completion indicators
+- All tests pass consistently (0 failed tests)
+- All `sorry` statements are replaced with complete proofs
+- Runtime checks can be removed from proven cases
+- `partial def` can be changed to `def` (if structurally recursive)
+- Property-based testing runs efficiently without timeouts
+
+## Common proof patterns
+- **Inequality proofs**: Use `linarith` for linear arithmetic, `omega` for Presburger arithmetic
+- **Equality proofs**: Use `simp` to unfold definitions, `rw` to substitute
+- **Constructor proofs**: Use `constructor` to split `∧` goals, `exact` for direct proofs
+- **Case analysis**: Use `match` discriminants: `match h: expr with` to get equality hypotheses
