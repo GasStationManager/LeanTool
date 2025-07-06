@@ -338,4 +338,114 @@ lemma finset_card_le_of_all_lt (S : Finset ℕ) (X : ℝ) (x_pos : X > 0) (s_pos
   exact le_trans (Nat.cast_le.mpr h_card_le_floor) h_floor_le_X
 
 
+lemma lemma12 (s : Finset ℕ) (ε : ℝ) (hε : ε > 0) (hε_small : ε < 1/100) (hs_prime : ∀ p ∈ s, p.Prime) :
+  (2 / ε : ℝ) ^ ((s.filter (fun (p : ℕ) => (((↑p) : ℝ) ^ ε < (2 : ℝ)))).card : ℝ) ≤ (2 / ε : ℝ) ^ (2 : ℝ) ^ (1 / ε) := by
+  -- It suffices to show that the cardinality is at most 2^(1/ε)
+  have h_base_gt_one : 1 < 2 / ε := by
+    rw [one_lt_div hε]
+    linarith [hε_small]
+  
+  rw [Real.rpow_le_rpow_left_iff h_base_gt_one]
+  
+  -- Need to show: card(filter) ≤ 2^(1/ε)
+  -- First, let's understand what the filter is selecting
+  -- p^ε < 2 is equivalent to p < 2^(1/ε) (taking 1/ε power of both sides)
+  have h_filter_bound : ∀ p ∈ s.filter (fun (p : ℕ) => (((↑p) : ℝ) ^ ε < (2 : ℝ))), (p : ℝ) < (2 : ℝ) ^ (1 / ε) := by
+    intro p hp
+    simp only [Finset.mem_filter] at hp
+    have hp_in_s : p ∈ s := hp.1
+    have hp_cond : (p : ℝ) ^ ε < 2 := hp.2
+    -- Since p is prime, p ≥ 2, so p > 0
+    have h_prime : p.Prime := hs_prime p hp_in_s
+    have hp_pos : 0 < (p : ℝ) := by simp [Nat.Prime.pos h_prime]
+    have hp_nonneg : 0 ≤ (p : ℝ) := le_of_lt hp_pos
+    -- We have p = p^1 = p^(ε * (1/ε)) = (p^ε)^(1/ε)
+    have h_inv : ε * (1 / ε) = 1 := by field_simp [ne_of_gt hε]
+    conv_lhs => rw [← Real.rpow_one (p : ℝ), ← h_inv, Real.rpow_mul hp_nonneg]
+    -- Now apply rpow_lt_rpow to both sides
+    have h_mono : (p : ℝ) ^ ε < 2 → ((p : ℝ) ^ ε) ^ (1 / ε) < 2 ^ (1 / ε) := by
+      intro h
+      apply Real.rpow_lt_rpow
+      · apply Real.rpow_nonneg hp_nonneg
+      · exact h
+      · exact div_pos one_pos hε
+    exact h_mono hp_cond
+  
+  -- Now use finset_card_le_of_all_lt
+  have h_X_pos : 0 < (2 : ℝ) ^ (1 / ε) := Real.rpow_pos_of_pos two_pos _
+  have h_all_pos : ∀ p ∈ s.filter (fun (p : ℕ) => (((↑p) : ℝ) ^ ε < (2 : ℝ))), p > 0 := by
+    intro p hp
+    simp only [Finset.mem_filter] at hp
+    have hp_in_s : p ∈ s := hp.1
+    have h_prime : p.Prime := hs_prime p hp_in_s
+    exact Nat.Prime.pos h_prime
+  
+  exact finset_card_le_of_all_lt _ _ h_X_pos h_all_pos h_filter_bound
+
+
+lemma lemma13 (n : ℕ) (ε : ℝ) (hn : n ≥ 1) (hε : ε > 0) (hε_small : ε < 1/100) : 
+  (tau n : ℝ) / ((n : ℝ) ^ ε) ≤ (2 / ε : ℝ) ^ ((2 : ℝ) ^ (1 / ε)) := by
+  -- First handle the case n = 0 (which is excluded by hn ≥ 1)
+  have hn_pos : n ≠ 0 := by linarith
+  
+  -- Express tau(n)/n^ε as a product using the factorization
+  rw [tau_n_div_n_rpow_eps_eq_prod n hn_pos ε]
+  
+  -- Apply lemma9 to split the product
+  have h_split := lemma9 n.primeFactors n.factorization ε hε hε_small 
+    (fun p hp => Nat.prime_of_mem_primeFactors hp)
+    (fun p hp => by
+      have : n.factorization p ≠ 0 := by
+        rw [← Nat.support_factorization] at hp
+        exact Finsupp.mem_support_iff.mp hp
+      exact Nat.one_le_iff_ne_zero.mpr this)
+  
+  rw [h_split]
+  
+  -- Now we have a product of two parts
+  -- The first part (p^ε ≥ 2) is bounded by 1 using lemma10
+  have h_first_bound := lemma10 n.primeFactors n.factorization ε hε hε_small
+    (fun p hp => Nat.prime_of_mem_primeFactors hp)
+    (fun p hp => by
+      have : n.factorization p ≠ 0 := by
+        rw [← Nat.support_factorization] at hp
+        exact Finsupp.mem_support_iff.mp hp
+      exact Nat.one_le_iff_ne_zero.mpr this)
+  
+  -- The second part (p^ε < 2) is bounded using lemma11
+  have h_second_bound := lemma11 n.primeFactors n.factorization ε hε hε_small
+    (fun p hp => Nat.prime_of_mem_primeFactors hp)
+    (fun p hp => by
+      have : n.factorization p ≠ 0 := by
+        rw [← Nat.support_factorization] at hp
+        exact Finsupp.mem_support_iff.mp hp
+      exact Nat.one_le_iff_ne_zero.mpr this)
+  
+  -- Now apply lemma12
+  have h_final := lemma12 n.primeFactors ε hε hε_small 
+    (fun p hp => Nat.prime_of_mem_primeFactors hp)
+  
+  -- Transform the second bound to use prod_const
+  have h_second_eq : (∏ p ∈ n.primeFactors.filter (fun (p : ℕ) => (p : ℝ) ^ ε < 2), (2 / ε : ℝ)) = 
+                     (2 / ε : ℝ) ^ (n.primeFactors.filter (fun (p : ℕ) => (p : ℝ) ^ ε < 2)).card := by
+    rw [Finset.prod_const]
+  
+  -- Since the first part ≤ 1 and the second part ≤ (2/ε)^card, their product is ≤ (2/ε)^card
+  calc (∏ p ∈ n.primeFactors.filter (fun (p : ℕ) => (p : ℝ) ^ ε ≥ 2), ((n.factorization p + 1 : ℝ) / ((p : ℝ) ^ ((n.factorization p : ℝ) * ε)))) *
+       (∏ p ∈ n.primeFactors.filter (fun (p : ℕ) => (p : ℝ) ^ ε < 2), ((n.factorization p + 1 : ℝ) / ((p : ℝ) ^ ((n.factorization p : ℝ) * ε)))) 
+    ≤ 1 * (∏ p ∈ n.primeFactors.filter (fun (p : ℕ) => (p : ℝ) ^ ε < 2), (2 / ε : ℝ)) := by
+        apply mul_le_mul h_first_bound h_second_bound
+        · apply Finset.prod_nonneg
+          intro p hp
+          apply div_nonneg
+          · simp only [add_nonneg, Nat.cast_nonneg, zero_le_one]
+          · apply Real.rpow_nonneg
+            exact Nat.cast_nonneg p
+        · exact zero_le_one
+    _ = (∏ p ∈ n.primeFactors.filter (fun (p : ℕ) => (p : ℝ) ^ ε < 2), (2 / ε : ℝ)) := by rw [one_mul]
+    _ = (2 / ε : ℝ) ^ (n.primeFactors.filter (fun (p : ℕ) => (p : ℝ) ^ ε < 2)).card := by rw [h_second_eq]
+    _ = (2 / ε : ℝ) ^ ((n.primeFactors.filter (fun (p : ℕ) => (p : ℝ) ^ ε < 2)).card : ℝ) := by norm_cast
+    _ ≤ (2 / ε : ℝ) ^ (2 : ℝ) ^ (1 / ε) := h_final
+
+
 
