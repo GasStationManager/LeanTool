@@ -447,5 +447,16 @@ lemma lemma13 (n : ℕ) (ε : ℝ) (hn : n ≥ 1) (hε : ε > 0) (hε_small : ε
     _ = (2 / ε : ℝ) ^ ((n.primeFactors.filter (fun (p : ℕ) => (p : ℝ) ^ ε < 2)).card : ℝ) := by norm_cast
     _ ≤ (2 / ε : ℝ) ^ (2 : ℝ) ^ (1 / ε) := h_final
 
+lemma lemma14 (ε : ℝ) (hε : ε > 0) (hε_small : ε < 1/100)  : ∃ (C : ℝ), C > 0 ∧ (2 / ε) ^ ((2 : ℝ) ^ (1 / ε)) ≤ C := by
+  -- Choose C to be the value of the expression plus 1
+  use (2 / ε) ^ ((2 : ℝ) ^ (1 / ε)) + 1
+  constructor
+  · -- Show C > 0
+    have h1 : 0 < 2 / ε := by positivity
+    have h2 : 0 < (2 : ℝ) ^ (1 / ε) := Real.rpow_pos_of_pos (by norm_num) _
+    have h3 : 0 < (2 / ε) ^ ((2 : ℝ) ^ (1 / ε)) := Real.rpow_pos_of_pos h1 _
+    linarith
+  · -- Show the inequality
+    linarith
 
 
