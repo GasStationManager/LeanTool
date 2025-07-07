@@ -459,4 +459,18 @@ lemma lemma14 (ε : ℝ) (hε : ε > 0) (hε_small : ε < 1/100)  : ∃ (C : ℝ
   · -- Show the inequality
     linarith
 
+lemma lemma15 (ε : ℝ) (hε : ε > 0) (hε_small : ε < 1/100)  : 
+  ∃ (C : ℝ), C > 0 ∧ ∀ (n : ℕ), 1 ≤ n → (tau n : ℝ) / ((n : ℝ) ^ ε) ≤ C := by
+  -- Use lemma14 to get a bound for the expression (2/ε)^(2^(1/ε))
+  obtain ⟨C, hC_pos, hC_bound⟩ := lemma14 ε hε hε_small
+  -- Use this C as our witness
+  use C
+  constructor
+  · exact hC_pos
+  · intro n hn
+    -- Apply lemma13 to bound tau(n)/n^ε
+    have h13 := lemma13 n ε hn hε hε_small
+    -- Combine with the bound from lemma14
+    exact le_trans h13 hC_bound
+
 
