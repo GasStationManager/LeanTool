@@ -473,4 +473,9 @@ lemma lemma15 (ε : ℝ) (hε : ε > 0) (hε_small : ε < 1/100)  :
     -- Combine with the bound from lemma14
     exact le_trans h13 hC_bound
 
+lemma lemma16 (ε : ℝ) (hε : ε > 0) (hε_small : ε < 1/100)  : 
+  ∃ (C : ℝ), C > 0 ∧ ∀ (n : ℕ), 1 ≤ n → (tau n : ℝ) / ((n : ℝ) ^ ε) ≤ C := by
+  -- Since lemma16 and lemma15 have identical statements, apply lemma15 directly
+  exact lemma15 ε hε hε_small
+
 
