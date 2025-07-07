@@ -506,3 +506,52 @@ lemma lemma17 (ε : ℝ) (hε : ε > 0) (hε_small : ε < 1/100)  :
     rw [h_simplify] at h_mul_ineq
     exact h_mul_ineq
 
+theorem divisor_bound_tau_le_n_pow_o_one :
+  ∀ ε : ℝ, ε > 0 → ε < 1/100 → 
+  Filter.Tendsto (fun n : ℕ => (tau n : ℝ) / (n : ℝ) ^ ε) Filter.atTop (nhds 0) := by
+  intro ε hε hε_small
+  
+  -- STEP 1: Apply lemma17 with ε/2 (the key insight!)
+  have hε_half : ε / 2 > 0 := by linarith
+  have hε_half_small : ε / 2 < 1/100 := by linarith
+  obtain ⟨C, hC_pos, hC_bound⟩ := lemma17 (ε / 2) hε_half hε_half_small
+  
+  -- STEP 2: Show tau(n)/n^ε ≤ C/n^(ε/2) eventually
+  have h_bound : ∀ᶠ n in Filter.atTop, (tau n : ℝ) / (n : ℝ) ^ ε ≤ C / (n : ℝ) ^ (ε / 2) := by
+    filter_upwards [Filter.eventually_gt_atTop 0] with n hn
+    -- For n > 0, we have n ≥ 1
+    have hn_ge_1 : 1 ≤ n := hn
+    have h1 := hC_bound n hn_ge_1  -- tau(n) ≤ C * n^(ε/2)
+    have h_n_pos : (0 : ℝ) < n := Nat.cast_pos.mpr hn
+    
+    -- Apply the bound: tau(n) ≤ C * n^(ε/2), so tau(n)/n^ε ≤ C/n^(ε/2)
+    have h_key : (tau n : ℝ) / (n : ℝ) ^ ε ≤ (C * (n : ℝ) ^ (ε / 2)) / (n : ℝ) ^ ε := by
+      apply div_le_div_of_nonneg_right h1
+      exact Real.rpow_nonneg (Nat.cast_nonneg n) ε
+    
+    -- Algebraic manipulation: C * n^(ε/2) / n^ε = C / n^(ε/2)
+    rw [mul_div_assoc] at h_key
+    have h_simp : (n : ℝ) ^ (ε / 2) / (n : ℝ) ^ ε = (n : ℝ) ^ (ε / 2 - ε) := by
+      exact (Real.rpow_sub h_n_pos (ε / 2) ε).symm
+    rw [h_simp] at h_key
+    have h_neg : ε / 2 - ε = -(ε / 2) := by ring
+    rw [h_neg, Real.rpow_neg (le_of_lt h_n_pos)] at h_key
+    rwa [div_eq_mul_inv] at h_key
+  
+  -- STEP 3: Show C/n^(ε/2) → 0
+  have h_lim : Filter.Tendsto (fun n : ℕ => C / (n : ℝ) ^ (ε / 2)) Filter.atTop (nhds 0) := by
+    have h_inv_lim : Filter.Tendsto (fun n : ℕ => (n : ℝ) ^ (-(ε / 2))) Filter.atTop (nhds 0) := 
+      (tendsto_rpow_neg_atTop hε_half).comp tendsto_natCast_atTop_atTop
+    convert h_inv_lim.const_mul C using 1
+    · ext n
+      rw [Real.rpow_neg (Nat.cast_nonneg n)]
+      simp [div_eq_inv_mul, mul_comm]
+    · rw [mul_zero]
+  
+  -- STEP 4: Apply squeeze theorem: 0 ≤ tau(n)/n^ε ≤ C/n^(ε/2) → 0
+  exact tendsto_of_tendsto_of_tendsto_of_le_of_le'
+    tendsto_const_nhds h_lim
+    (Filter.Eventually.of_forall fun n => 
+      div_nonneg (Nat.cast_nonneg _) (Real.rpow_nonneg (Nat.cast_nonneg _) _))
+    h_bound
+
