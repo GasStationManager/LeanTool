@@ -478,4 +478,31 @@ lemma lemma16 (ε : ℝ) (hε : ε > 0) (hε_small : ε < 1/100)  :
   -- Since lemma16 and lemma15 have identical statements, apply lemma15 directly
   exact lemma15 ε hε hε_small
 
+lemma lemma17 (ε : ℝ) (hε : ε > 0) (hε_small : ε < 1/100)  : 
+  ∃ (C : ℝ), C > 0 ∧ ∀ (n : ℕ), 1 ≤ n → (tau n : ℝ) ≤ C * ((n : ℝ) ^ ε) := by
+  -- Get the constant from lemma16
+  obtain ⟨C, hC_pos, hC_bound⟩ := lemma16 ε hε hε_small
+  -- Use the same constant C
+  use C
+  constructor
+  · exact hC_pos
+  · intro n hn
+    -- We have (tau n : ℝ) / ((n : ℝ) ^ ε) ≤ C from lemma16
+    have h_div_bound := hC_bound n hn
+    -- We need to show (tau n : ℝ) ≤ C * ((n : ℝ) ^ ε)
+    -- Since ((n : ℝ) ^ ε) > 0, we can multiply both sides by it
+    have h_pow_pos : 0 < ((n : ℝ) ^ ε) := by
+      apply Real.rpow_pos_of_pos
+      rw [Nat.cast_pos]
+      exact Nat.pos_of_ne_zero (Nat.one_le_iff_ne_zero.mp hn)
+    -- Multiply both sides of the inequality by ((n : ℝ) ^ ε)
+    have h_mul_ineq : ((tau n : ℝ) / ((n : ℝ) ^ ε)) * ((n : ℝ) ^ ε) ≤ C * ((n : ℝ) ^ ε) := by
+      apply mul_le_mul_of_nonneg_right h_div_bound
+      exact le_of_lt h_pow_pos
+    -- Simplify the left side using div_mul_cancel₀
+    have h_simplify : ((tau n : ℝ) / ((n : ℝ) ^ ε)) * ((n : ℝ) ^ ε) = (tau n : ℝ) := by
+      apply div_mul_cancel₀
+      exact ne_of_gt h_pow_pos
+    rw [h_simplify] at h_mul_ineq
+    exact h_mul_ineq
 
