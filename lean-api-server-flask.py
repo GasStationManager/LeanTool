@@ -58,12 +58,12 @@ def create_chat_completion_response(result, verbose=True):
             if len(result['attempts'])>0: print("\nAttempts:",file=attf)
             for i, attempt in enumerate(result["attempts"], 1):
                 print(f"\nAttempt {i}:",file=attf)
-                if "thought" in attempt:
+                if "thought" in attempt and attempt['thought']:
                     print("Thought:\n"+attempt['thought'],file=attf)
-                if "code" in attempt:
+                if "code" in attempt and attempt['code']:
                     print("Code:",file=attf)
                     print("```\n"+attempt["code"]+"\n```\n",file=attf)
-                    if "result" in attempt:
+                    if "result" in attempt and attepmt['result']:
                         print("Success:", attempt["result"]["success"], file=attf)
                         print("Output:", attempt["result"]["output"], file=attf)
                         if attempt["result"]["error"]:
