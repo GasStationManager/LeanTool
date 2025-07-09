@@ -63,7 +63,7 @@ def create_chat_completion_response(result, verbose=True):
                 if "code" in attempt and attempt['code']:
                     print("Code:",file=attf)
                     print("```\n"+attempt["code"]+"\n```\n",file=attf)
-                    if "result" in attempt and attepmt['result']:
+                    if "result" in attempt and attempt['result']:
                         print("Success:", attempt["result"]["success"], file=attf)
                         print("Output:", attempt["result"]["output"], file=attf)
                         if attempt["result"]["error"]:
