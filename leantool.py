@@ -281,7 +281,7 @@ class RunTests:
       }
     }
 
-default_plugins=[LoadSorry(), LeanFeatures(), SorryHammer()]
+default_plugins=[LoadSorry(), LeanFeatures(), SorryHammer(), RunTests()]
 
 
 async def interactive_lean_check(
