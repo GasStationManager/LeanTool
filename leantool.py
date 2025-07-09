@@ -10,6 +10,9 @@ import re
 import traceback
 
 import litellm
+
+from pbtdp import run_property_testing
+
 litellm.set_verbose=True
 litellm.drop_params=True
 
@@ -241,6 +244,42 @@ Alternatively, without setting the `sorry_hammer` flag, you could manually repla
                             result['output']+=[{'data':output}]+cf_result['output']
         return result
 
+
+class RunTests:
+  def __init__(self):
+    self.tool_name = "run_tests"
+    self.sys_msg=""
+
+  async def tool_function(self, code: str, signature: str, num_tests: int=20):
+    inputo={'function_signature':signature, 'code_solution':code}
+    return await run_property_testing(inputo, num_tests=num_tests )
+    
+  def tool_def(self):
+    return {
+      "type": "function",
+      "function":{
+        "name": "run_tests",
+        "description": "Given Lean code containing a function with the given signature, evaluate the function with randomly-generated inputs. Collect the cases with 'Error:' or 'failed check:' in their output",
+        "parameters": {
+            "type": "object",
+            "properties": {
+                "code": {
+                    "type": "string",
+                    "description": "Lean 4 code containing definitions"
+                },
+                "signature": {
+                    "type": "string",
+                    "description": "Signature of the function to test"
+                },
+                "num_tests": {
+                    "type": "integer",
+                    "description": "number of tests to run. Default is 20"
+                },
+            },
+            "required": ["code", "signature"]
+        }
+      }
+    }
 
 default_plugins=[LoadSorry(), LeanFeatures(), SorryHammer()]
 
