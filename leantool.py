@@ -24,7 +24,7 @@ models={
   'qwen':'ollama/hf.co/bartowski/Qwen2.5-Coder-14B-Instruct-GGUF:IQ4_XS',
   'qwen-max':'openrouter/qwen/qwen-max',
   'qwq': 'openrouter/qwen/qwq-32b',
-  'grok':'openrouter/x-ai/grok-2-1212',
+  'grok4':'xai/grok-4-0709',
   'deepseek': 'deepseek/deepseek-chat',
   'r1': 'deepseek/deepseek-reasoner',
   'deepseek-coder':'ollama/hf.co/bartowski/DeepSeek-Coder-V2-Lite-Instruct-GGUF:Q5_K_M',
