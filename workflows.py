@@ -48,4 +48,7 @@ WORKFLOW_DEFS = {
 
 class Workflows:
     def __init__(self, workflow='basic_fixing'):
+        self.set(workflow)
+    def set(self,workflow):
+        self.workflow=workflow
         self.sys_msg=WORKFLOW_INIT + WORKFLOW_DEFS.get(workflow, BASIC_FIXING)
