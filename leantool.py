@@ -296,7 +296,8 @@ async def interactive_lean_check(
     plain_text_mode = False,
     debug = False,
     messages=None,
-    api_key: str = None
+    api_key: str = None,
+    workflow = None
 ) -> Dict[str, Any]:
     """
     Interactively work with an LLM to generate valid Lean code, allowing for
@@ -311,6 +312,8 @@ async def interactive_lean_check(
     if plain_text_mode:
         SYSTEM_MESSAGE_INFO += SYSTEM_MESSAGE_PLAIN_TEXT
     for p in plugins:
+        if isinstance(p, Workflows) and workflow:
+            p.set(workflow)
         SYSTEM_MESSAGE_INFO += p.sys_msg
     if not messages: messages=[{"role": "system", "content": SYSTEM_MESSAGE_INFO+SYSTEM_MESSAGE_OUTPUT.format(max_attempts=max_attempts)}]
     elif SYSTEM_MESSAGE_INFO not in [m['content'] for m in messages]:
