@@ -269,7 +269,7 @@ class RunTests:
                 },
                 "signature": {
                     "type": "string",
-                    "description": "Signature of the function to test"
+                    "description": "Signature of the function to test, in parenthesis notation. E.g. 'f (a b: Nat) (c: Int)'"
                 },
                 "num_tests": {
                     "type": "integer",
