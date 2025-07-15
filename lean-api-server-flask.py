@@ -151,6 +151,8 @@ def chat_completions():
         # Extract other parameters
         temperature = data.get("temperature", 0.1)
         max_attempts = data.get("max_attempts", 5)
+
+        workflow = data.get("workflow", 'basic_fixing')
         
         # Create event loop and run async function
         loop = asyncio.new_event_loop()
@@ -162,7 +164,8 @@ def chat_completions():
             temperature=temperature,
             max_attempts=max_attempts,
             messages=messages[:-1],  # Pass previous messages for context
-            api_key=api_key
+            api_key=api_key,
+            workflow=workflow
         ))
         
         stream = data.get("stream", False)
