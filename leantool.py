@@ -12,6 +12,7 @@ import traceback
 import litellm
 
 from pbtdp import run_property_testing
+from workflows import Workflows
 
 litellm.set_verbose=True
 litellm.drop_params=True
@@ -281,7 +282,7 @@ class RunTests:
       }
     }
 
-default_plugins=[LoadSorry(), LeanFeatures(), SorryHammer(), RunTests()]
+default_plugins=[LoadSorry(), LeanFeatures(), SorryHammer(), RunTests(), Workflows()]
 
 
 async def interactive_lean_check(
