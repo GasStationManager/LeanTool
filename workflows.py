@@ -43,6 +43,7 @@ and prove the theorem statements by making use of the return type of the impleme
 WORKFLOW_DEFS = {
   'basic_fixing': BASIC_FIXING,
   'draft_sketch_prove': DRAFT_SKETCH_PROVE,
+  'code_test_prove': CODE_TEST_PROVE, 
 }
 
 class Workflows:
