@@ -45,7 +45,7 @@ async def run_tests (code: str, signature: str, num_tests: int=20) -> Dict[str,A
 
     Args:
         code: Lean code containing definitions
-        signature: signature of the function to test
+        signature: signature of the function to test, in parenthesis notation. E.g. 'f (a b: Nat) (c: Int)'
         num_tests: number of tests to run
     Returns:
         Dictionary containing:
