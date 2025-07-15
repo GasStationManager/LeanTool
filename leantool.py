@@ -51,20 +51,12 @@ class LeanToolException(Exception):
     pass
 
 SYSTEM_MESSAGE_TOOLS = """You are an assistant that writes Lean 4 code. 
-You have access to a tool that can pass your code to be compiled and executed by the Lean proof assistant.
+You have access to a tool `check_lean_code` that can pass your code to be compiled and executed by the Lean proof assistant.
 
 You can use the tool to:
 - Verify that your Lean 4 code is syntactically valid
 - Run your code with test inputs and check the results 
 - Utilize Lean's interative features to return suggestions and/or information that helps you complete the task
-
-If you believe you can directly solve the task given by the request:
-1. Write initial code based on the request
-2. Invoke the tool to verify it
-3. If there are errors, analyze them and make modifications
-4. Continue this loop until either:
-   - The code is valid
-   - You determine you cannot fix the issues
 """
 
 SYSTEM_MESSAGE_PLAIN_TEXT = """You may invoke the tool by enclosing your Lean 4 code in <Try> ... </Try> tags, without any <Result> </Result> tags in your output.
@@ -72,11 +64,7 @@ Your code inside the <Try> tags will be executed by Lean and outputs including e
 """
 
 SYSTEM_MESSAGE_LOAD_SORRY = """
-If you believe the task is more complex and would benefit from a step by step approach:
-1. Start with a proof sketch containing `sorry` placeholders.
-2. Call check_lean_code. If your code is syntactically correct, the tool will output goal states corresponding to each `sorry`
-3. Replace a `sorry` with a proof or a more refined proof sketch. Call check_lean_code to verify.
-4. Repeat until the code is complete with no `sorry` left
+If your code is syntactically correct but contains `sorry` placeholders, calling the check_lean_code tool will output goal states corresponding to each `sorry`.
 """
 
 SYSTEM_MESSAGE_FEATURES = """
@@ -249,7 +237,18 @@ Alternatively, without setting the `sorry_hammer` flag, you could manually repla
 class RunTests:
   def __init__(self):
     self.tool_name = "run_tests"
-    self.sys_msg=""
+    self.sys_msg="""## run_tests tool for property-based testing
+You have access to a tool `run_tests` that takes Lean source code and the signature of a function you want to test, and evaluates the function with randomly-generated inputs.
+Common pattern for writing run-time tests in the function: 
+```
+let checkRes:Bool := condition_matching_proof_goal
+if !checkRes then
+  IO.println "failed check: [exact condition being tested]"
+return ResultType (by sorry)
+```
+Here `condition_matching_proof_goal` should match the goal extracted from the subsequent `sorry` when running the `check_lean_code` tool.
+Then, if `condition_matching_proof_goal` evaluates to `false`, we know that for this input, the goal corresponding to the `sorry` is false, and there is likely a bug in the function's implementation.
+"""
 
   async def tool_function(self, code: str, signature: str, num_tests: int=20):
     inputo={'function_signature':signature, 'code_solution':code}
