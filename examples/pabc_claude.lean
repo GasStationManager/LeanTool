@@ -1,3 +1,7 @@
+/-
+Proving lemmas and theorems from Morph Lab's recent autoformalization for De Brujin's theorem 
+Using Claude Desktop, LeanTool and LeanExplore
+-/
 import Mathlib
 
 lemma two_rpow_ge_add_one (x : ℝ) (hx : x ≥ 1) : 2 ^ x ≥ x + 1 := by
@@ -564,3 +568,24 @@ lemma rad_eq_prod_distinct_prime_factors (n : ℕ) (hn : n ≠ 0) :
   simp only [hn, if_false]
   simp only [Nat.support_factorization]
 
+lemma rad_mul_of_coprime {a b : ℕ} (h : Nat.Coprime a b) : rad (a * b) = rad a * rad b := by
+  -- Handle the case where the product is 0
+  by_cases hab : a * b = 0
+  · rw [Nat.mul_eq_zero] at hab
+    cases hab with
+    | inl ha => 
+      -- If a = 0, then b = 1 since they're coprime
+      have hb : b = 1 := by rwa [ha, Nat.coprime_zero_left] at h
+      simp [rad, ha, hb]
+    | inr hb => 
+      -- If b = 0, then a = 1 since they're coprime
+      have ha : a = 1 := by rwa [hb, Nat.coprime_zero_right] at h
+      simp [rad, ha, hb]
+  · -- Case where a * b ≠ 0
+    have ha : a ≠ 0 := left_ne_zero_of_mul hab
+    have hb : b ≠ 0 := right_ne_zero_of_mul hab
+    simp only [rad, hab, ha, hb, if_false]
+    -- Key insight: for coprime numbers, prime factors of product = union of prime factors
+    rw [Nat.Coprime.primeFactors_mul h]
+    -- Since prime factors are disjoint, product over union = product of products
+    rw [Finset.prod_union (Nat.Coprime.disjoint_primeFactors h)]
