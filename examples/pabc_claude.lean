@@ -589,3 +589,16 @@ lemma rad_mul_of_coprime {a b : ℕ} (h : Nat.Coprime a b) : rad (a * b) = rad a
     rw [Nat.Coprime.primeFactors_mul h]
     -- Since prime factors are disjoint, product over union = product of products
     rw [Finset.prod_union (Nat.Coprime.disjoint_primeFactors h)]
+
+lemma rad_abc_of_coprime (a b c : ℕ) (ha : a ≥ 1) (hb : b ≥ 1) (hc : c ≥ 1) 
+    (h_abc_coprime : Nat.Coprime a (b * c)) (h_bc_coprime : Nat.Coprime b c) : 
+    rad (a * b * c) = rad a * rad b * rad c := by
+  -- Strategy: Apply the two-factor multiplicative property twice
+  -- First rewrite a * b * c as a * (b * c)
+  rw [mul_assoc a b c]
+  -- Apply rad_mul_of_coprime with a and (b * c): rad(a * (b * c)) = rad(a) * rad(b * c)
+  rw [rad_mul_of_coprime h_abc_coprime]
+  -- Apply rad_mul_of_coprime with b and c: rad(b * c) = rad(b) * rad(c)
+  rw [rad_mul_of_coprime h_bc_coprime]
+  -- Rearrange multiplication: rad a * (rad b * rad c) = rad a * rad b * rad c
+  rw [← mul_assoc]
