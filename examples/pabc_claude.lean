@@ -555,3 +555,12 @@ theorem divisor_bound_tau_le_n_pow_o_one :
       div_nonneg (Nat.cast_nonneg _) (Real.rpow_nonneg (Nat.cast_nonneg _) _))
     h_bound
 
+-- Definition [Radical]
+def rad (n : ℕ) : ℕ := if n = 0 then 0 else n.primeFactors.prod id
+
+lemma rad_eq_prod_distinct_prime_factors (n : ℕ) (hn : n ≠ 0) : 
+  rad n = n.factorization.support.prod id := by
+  unfold rad
+  simp only [hn, if_false]
+  simp only [Nat.support_factorization]
+
