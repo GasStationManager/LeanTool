@@ -602,3 +602,24 @@ lemma rad_abc_of_coprime (a b c : ℕ) (ha : a ≥ 1) (hb : b ≥ 1) (hc : c ≥
   rw [rad_mul_of_coprime h_bc_coprime]
   -- Rearrange multiplication: rad a * (rad b * rad c) = rad a * rad b * rad c
   rw [← mul_assoc]
+
+lemma lemma23 (a b c : ℕ) (ha : a ≥ 1) (hb : b ≥ 1) (hc : c ≥ 1) 
+    (h_abc_coprime : Nat.Coprime a (b * c)) (h_bc_coprime : Nat.Coprime b c) : 
+    rad (a * b) * rad (a * c) * rad (b * c) = (rad (a * b * c)) ^ 2 := by
+  -- First derive that a, b, c are pairwise coprime from the given conditions
+  have h_ac_coprime : Nat.Coprime a c := Nat.Coprime.coprime_mul_left_right h_abc_coprime
+  have h_ab_coprime : Nat.Coprime a b := by
+    rw [mul_comm b c] at h_abc_coprime
+    exact Nat.Coprime.coprime_mul_left_right h_abc_coprime
+  
+  -- Apply multiplicative properties to expand each term
+  rw [rad_mul_of_coprime h_ab_coprime]   -- rad(a*b) = rad(a) * rad(b)
+  rw [rad_mul_of_coprime h_ac_coprime]   -- rad(a*c) = rad(a) * rad(c)
+  rw [rad_mul_of_coprime h_bc_coprime]   -- rad(b*c) = rad(b) * rad(c)
+  
+  -- Apply three-factor multiplicative property to the right side
+  rw [rad_abc_of_coprime a b c ha hb hc h_abc_coprime h_bc_coprime]
+  
+  -- Now we have: (rad a * rad b) * (rad a * rad c) * (rad b * rad c) = (rad a * rad b * rad c)²
+  -- This simplifies to: (rad a)² * (rad b)² * (rad c)² = (rad a * rad b * rad c)²
+  ring
