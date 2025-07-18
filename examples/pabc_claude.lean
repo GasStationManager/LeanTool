@@ -1,6 +1,7 @@
 /-
-Proving lemmas and theorems from Morph Lab's recent autoformalization for De Brujin's theorem 
-Using Claude Desktop, LeanTool and LeanExplore
+Proving lemmas and theorems from Morph Lab's recent autoformalization for De Brujin's theorem (https://github.com/morph-labs/lean-abc-true-almost-always)
+Using Claude Desktop, LeanTool and LeanExplore. See https://gasstationmanager.github.io/ai/2025/07/06/leantool-updates.html#leantool--leanexplore 
+for more details on the set up.
 -/
 import Mathlib
 
@@ -623,3 +624,47 @@ lemma lemma23 (a b c : ℕ) (ha : a ≥ 1) (hb : b ≥ 1) (hc : c ≥ 1)
   -- Now we have: (rad a * rad b) * (rad a * rad c) * (rad b * rad c) = (rad a * rad b * rad c)²
   -- This simplifies to: (rad a)² * (rad b)² * (rad c)² = (rad a * rad b * rad c)²
   ring
+
+lemma lemma24 (n : ℕ) (hn : n ≥ 1) (s : Finset ℕ) (hs_prime : ∀ p ∈ s, p.Prime) 
+    (h_rad : rad n = s.prod id) :
+  ∀ p ∈ s, n.factorization p ≥ 1 := by
+  intro p hp
+  
+  -- Since n ≥ 1, we have n ≠ 0
+  have hn_ne_zero : n ≠ 0 := Nat.one_le_iff_ne_zero.mp hn
+  
+  -- p is prime
+  have hp_prime : p.Prime := hs_prime p hp
+  
+  -- Since p ∈ s, we have p ∣ s.prod id
+  have hp_dvd_sprod : p ∣ s.prod id := Finset.dvd_prod_of_mem id hp
+  
+  -- From h_rad: rad n = s.prod id, so p ∣ rad n  
+  have hp_dvd_rad : p ∣ rad n := by
+    rwa [h_rad]
+  
+  -- Unfold rad n = n.primeFactors.prod id (since n ≠ 0)
+  have hp_dvd_nprod : p ∣ n.primeFactors.prod id := by
+    unfold rad at hp_dvd_rad
+    simpa [hn_ne_zero] using hp_dvd_rad
+  
+  -- The product n.primeFactors.prod id is the same as ∏ p ∈ n.primeFactors, p
+  -- and this product divides n (since each prime factor divides n)
+  have hnprod_dvd_n : n.primeFactors.prod id ∣ n := by
+    rw [show n.primeFactors.prod id = ∏ p ∈ n.primeFactors, p by rfl]
+    exact Nat.prod_primeFactors_dvd n
+  
+  -- Therefore p ∣ n (by transitivity)
+  have hp_dvd_n : p ∣ n := dvd_trans hp_dvd_nprod hnprod_dvd_n
+  
+  -- Since p is prime, p ∣ n, and n ≠ 0, we have p ∈ n.primeFactors
+  have hp_mem : p ∈ n.primeFactors := by
+    rw [Nat.mem_primeFactors]
+    exact ⟨hp_prime, hp_dvd_n, hn_ne_zero⟩
+  
+  -- Since p ∈ n.primeFactors = support of n.factorization, we have n.factorization p ≠ 0
+  have hp_ne_zero : n.factorization p ≠ 0 := by
+    rwa [← Finsupp.mem_support_iff, Nat.support_factorization]
+  
+  -- Since n.factorization p ≠ 0 and is a natural number, n.factorization p ≥ 1
+  exact Nat.one_le_iff_ne_zero.mpr hp_ne_zero
