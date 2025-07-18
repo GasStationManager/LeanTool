@@ -726,3 +726,19 @@ lemma lemma26 (s : Finset ℕ) (hs_prime : ∀ p ∈ s, p.Prime) :
     exact hn_ge_one
   · -- Show ∀ p ∈ s, n.factorization p ≥ 1
     exact lemma24 n hn_ge_one s hs_prime h_rad
+
+-- This one was proved by Grok 4
+lemma card_finset_eq_sum_ones (s : Finset ℕ) : s.card = ∑ _x ∈ s, 1 := by
+  rw [← Finset.card_eq_sum_ones]
+
+-- This one by Grok 4
+lemma lemma28 (ε : ℝ) (n N : ℕ) (hε : ε > 0) (hε_small : ε < 1/100)  (hn : 1 ≤ n) (hnN : n ≤ N) : 1 / ((n : ℝ) ^ ε) ≥ 1 / ((N : ℝ) ^ ε) := by
+  let a : ℝ := (n : ℝ) ^ ε
+  let b : ℝ := (N : ℝ) ^ ε
+  have hn_pos : 0 < (n : ℝ) := lt_of_lt_of_le zero_lt_one (Nat.one_le_cast.mpr hn)
+  have hN_pos : 0 < (N : ℝ) := lt_of_lt_of_le hn_pos (Nat.cast_le.mpr hnN)
+  have ha_pos : 0 < a := Real.rpow_pos_of_pos hn_pos ε
+  have hb_pos : 0 < b := Real.rpow_pos_of_pos hN_pos ε
+  have h_le : a ≤ b := Real.rpow_le_rpow (Nat.cast_nonneg n) (Nat.cast_le.mpr hnN) (le_of_lt hε)
+  have h_inv : (1 / b ≤ 1 / a) ↔ (a ≤ b) := one_div_le_one_div hb_pos ha_pos
+  exact h_inv.mpr h_le
