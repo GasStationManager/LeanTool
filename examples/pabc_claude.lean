@@ -668,3 +668,61 @@ lemma lemma24 (n : ℕ) (hn : n ≥ 1) (s : Finset ℕ) (hs_prime : ∀ p ∈ s,
   
   -- Since n.factorization p ≠ 0 and is a natural number, n.factorization p ≥ 1
   exact Nat.one_le_iff_ne_zero.mpr hp_ne_zero
+
+/-- The set of natural numbers `n` up to `N` such that `rad n = r`. -/
+def radical_set (r N : ℕ) : Finset ℕ := (Finset.range (N + 1)).filter (fun n => rad n = r)
+
+/-- The set of natural numbers whose prime factors are exactly the set `s`. -/
+def target_set (s : Finset ℕ) : Set ℕ :=
+  { m : ℕ | m.primeFactors = s ∧ m ≥ 1 ∧ ∀ p ∈ s, m.factorization p ≥ 1 }
+
+lemma lemma26 (s : Finset ℕ) (hs_prime : ∀ p ∈ s, p.Prime) :
+  { n : ℕ | rad n = s.prod id } ⊆ target_set s := by
+  intro n hn
+  have h_rad : rad n = s.prod id := hn
+  
+  -- First establish n ≠ 0 and n ≥ 1
+  have hn_ne_zero : n ≠ 0 := by
+    intro h0
+    rw [h0] at h_rad
+    simp [rad] at h_rad
+    have h_prod_ne_zero : s.prod id ≠ 0 := by
+      apply Finset.prod_ne_zero_iff.mpr
+      intro p hp
+      have hp_prime : p.Prime := hs_prime p hp
+      exact Nat.Prime.ne_zero hp_prime
+    exact h_prod_ne_zero h_rad.symm
+  
+  have hn_ge_one : n ≥ 1 := Nat.one_le_iff_ne_zero.mpr hn_ne_zero
+  
+  constructor
+  · -- Show n.primeFactors = s
+    have h_eq : n.primeFactors.prod id = s.prod id := by
+      unfold rad at h_rad
+      simp [hn_ne_zero] at h_rad
+      exact h_rad
+    
+    -- Convert to the standard form: prod id = ∏ p ∈ s, p
+    have h_eq_standard : ∏ p ∈ n.primeFactors, p = ∏ p ∈ s, p := by
+      simp only [id_eq] at h_eq
+      exact h_eq
+    
+    -- All elements in n.primeFactors are prime
+    have h_nfactors_prime : ∀ p ∈ n.primeFactors, p.Prime := 
+      fun p hp => Nat.prime_of_mem_primeFactors hp
+    
+    -- Apply Nat.primeFactors_prod: if all elements in a set are prime,
+    -- then primeFactors of their product equals the original set
+    have h_left : Nat.primeFactors (∏ p ∈ n.primeFactors, p) = n.primeFactors := 
+      Nat.primeFactors_prod h_nfactors_prime
+    have h_right : Nat.primeFactors (∏ p ∈ s, p) = s := 
+      Nat.primeFactors_prod hs_prime
+    
+    -- Since the products are equal, their prime factors are equal
+    rw [← h_left, ← h_right, h_eq_standard]
+    
+  constructor
+  · -- Show n ≥ 1  
+    exact hn_ge_one
+  · -- Show ∀ p ∈ s, n.factorization p ≥ 1
+    exact lemma24 n hn_ge_one s hs_prime h_rad
