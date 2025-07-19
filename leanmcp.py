@@ -17,7 +17,7 @@ mcp = FastMCP("LeanTool")
 
 
 @mcp.tool()
-async def check_lean (code: str, json_output: bool = False, sorry_hammer: bool = False)-> Dict[str, Any]:
+async def check_lean (code: str, json_output: bool = False, sorry_hammer: bool = False, try_negation: bool = False)-> Dict[str, Any]:
     """
     Sends code to the Lean executable and returns the results.
     If the code is syntactically correct but contains `sorry`s, 
@@ -26,8 +26,8 @@ async def check_lean (code: str, json_output: bool = False, sorry_hammer: bool =
     Args:
         code: Lean code to check
         json_output: Whether to get output in JSON format
-        sorry_hammer: If True, the tool will attempt to replace the first `sorry` in the code with a proof using a hammer tactic.
-        
+        sorry_hammer: If true, the tool will attempt to replace the first `sorry` in the code with a proof using a hammer tactic.
+        try_negation: If true, and the sorry_hammer option is true, then if the hammer tactic fails to prove the goal of the first sorry, the tool will try to prove the negation of the goal statement. Defaults to false. Do not turn this on if you are currently trying to prove a contradiction, e.g. when the goal is `False`.
     Returns:
         Dictionary containing:
             - success: bool indicating if code checked successfully
@@ -35,7 +35,7 @@ async def check_lean (code: str, json_output: bool = False, sorry_hammer: bool =
             - error: string containing error message if any
             - code: the modified code (if using sorry_hammer and the hammer was successful)
     """
-    return await check_lean_code (code, json_output, sorry_hammer)
+    return await check_lean_code (code, json_output, sorry_hammer, try_negation)
 
 @mcp.tool()
 async def run_tests (code: str, signature: str, num_tests: int=20) -> Dict[str,Any]:
