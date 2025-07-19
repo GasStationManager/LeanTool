@@ -38,8 +38,7 @@ models={
   'o4-mini':'o4-mini',
   'gpt':'gpt-4o',
   'gpt45':'openai/gpt-4.5-preview-2025-02-27',
-  'gemini-flash':'gemini/gemini-2.0-flash-exp',
-  'gemini-flash-thinking':'gemini/gemini-2.0-flash-thinking-exp',
+  'gemini-flash':'gemini/gemini-2.5-flash',
   'gemini-pro':'gemini/gemini-2.5-pro-preview-06-05',
   'codestral':'openrouter/mistralai/codestral-2501',
   'mistral-large':'openrouter/mistralai/mistral-large-2411'
