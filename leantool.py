@@ -178,18 +178,17 @@ class LoadSorry:
 
 
 class SorryHammer:
-    def __init__(self, tactic = ['omega','hammer {disableAuto := true}'], imports = 'import Hammer\n', greedy=False, try_negation=True):
+    def __init__(self, tactic = ['omega','hammer {disableAuto := true}'], imports = 'import Hammer\n', greedy=False):
         self.tactic = tactic if isinstance(tactic, str) else "first | " + " | ".join(['('+t+')' for t in tactic])
         self.imports = imports
         self.greedy = greedy
-        self.try_negation = try_negation
         self.sys_msg = f"""
 If the `sorry_hammer` parameter of the check_lean_code tool call is set to True,
 the tool will attempt to replace the first `sorry` in your code with a proof using a hammer tactic `{self.tactic}`.
 If successful, it will return the modified code in the `code` field of the result.
 Alternatively, without setting the `sorry_hammer` flag, you could manually replace a `sorry` with `{self.tactic}`, after including the imports `{self.imports}` in your code.
 """
-    async def process(self, code, result):
+    async def process(self, code, result, try_negation=False):
         has_sorry = result_has_sorry(result)
         orig_code = code
         if result['success'] and has_sorry:
@@ -202,7 +201,10 @@ Alternatively, without setting the `sorry_hammer` flag, you could manually repla
                 print ("SorryHammer succeeded")
                 output = "SorryHammer successfully replaced "
                 if result_has_sorry(new_result):
+                  if self.greedy:
                     output += "some sorrys, but some remain."
+                  else:
+                    output += "the first sorry." 
                 else:
                     output += "all sorrys."
                 if isinstance(result['output'], str):
@@ -217,7 +219,7 @@ Alternatively, without setting the `sorry_hammer` flag, you could manually repla
                     result['output'] +='\n' + output + '\n' + new_result['output']
                 else:
                     result['output']+=[{'data': output}] + new_result['output']
-                if self.try_negation:
+                if try_negation:
                     code = orig_code
                     if self.imports not in code:
                         code = self.imports + '\n' + code
@@ -423,6 +425,7 @@ async def interactive_lean_check(
                     code=prefix+args["code"],
                     json_output=args.get("json_output", False),
                     sorry_hammer=args.get("sorry_hammer", False),
+                    try_negation=args.get("try_negation", False),
                     plugins=plugins
                   )
                 
@@ -518,11 +521,15 @@ def create_lean_check_function() -> Dict[str, Any]:
                 },
                 "json_output": {
                     "type": "boolean",
-                    "description": "Whether to get Lean's output in JSON format. If omitted, defaults to False"
+                    "description": "Whether to get Lean's output in JSON format. If omitted, defaults to false"
                 },
                 "sorry_hammer": {
                     "type": "boolean",
-                    "description": "If True, the tool will attempt to replace the first `sorry` in the code with a proof using a hammer tactic. Defaults to False."
+                    "description": "If true, the tool will attempt to replace the first `sorry` in the code with a proof using a hammer tactic. Defaults to false."
+                },
+                "try_negation": {
+                    "type": "boolean",
+                    "description": "If true, and the sorry_hammer option is true, then if the hammer tactic fails to prove the goal of the first sorry, the tool will try to prove the negation of the goal statement. Defaults to false. Do not turn this on if you are currently trying to prove a contradiction, e.g. when the goal is `False`."
                 },
             },
             "required": ["code"]
@@ -531,7 +538,7 @@ def create_lean_check_function() -> Dict[str, Any]:
     }
 
 
-async def check_lean_code(code: str, json_output: bool = False, sorry_hammer:bool = False, plugins = default_plugins) -> Dict[str, Any]:
+async def check_lean_code(code: str, json_output: bool = False, sorry_hammer:bool = False, try_negation:bool = False, plugins = default_plugins) -> Dict[str, Any]:
     """
     Sends code to the Lean executable and returns the results.
     
@@ -584,8 +591,10 @@ async def check_lean_code(code: str, json_output: bool = False, sorry_hammer:boo
         }
         for p in plugins:
             if hasattr(p, 'process'):
-                if sorry_hammer or not isinstance(p, SorryHammer):
+                if not isinstance(p, SorryHammer):
                     result=await p.process(code, result)
+                elif sorry_hammer:
+                    result=await p.process(code, result, try_negation=try_negation)
         return result
 
     except subprocess.CalledProcessError as e:
