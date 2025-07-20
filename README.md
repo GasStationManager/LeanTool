@@ -34,6 +34,10 @@ To use it, connect your app to the above URL as the API Base URL, "provider" as 
 "model" as one of the key names in the models dict in [leantool.py](https://github.com/GasStationManager/LeanTool/blob/main/leantool.py),
 and API key as your API key for the chosen model. See below for specific set up details for OpenWebUI, Continue.dev, Cline and Aider.
 
+## ProvablyCorrectVibeCoding
+
+[http://ProvablyCorrectVibeCoding.com](http://ProvablyCorrectVibeCoding.com) is a web front end to LeanTool and [SafeVerify](https://github.com/GasStationManager/SafeVerify).  
+
 ## Installation
 
 - Install Lean. E.g. for Linux:
