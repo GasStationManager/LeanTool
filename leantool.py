@@ -191,12 +191,13 @@ Alternatively, without setting the `sorry_hammer` flag, you could manually repla
     async def process(self, code, result, try_negation=False):
         has_sorry = result_has_sorry(result)
         orig_code = code
+        json_output = not isinstance(result['output'], str)
         if result['success'] and has_sorry:
             print ("Plugin SorryHammer activated")
             if self.imports not in code:
                 code = self.imports + '\n' + code
             code = code.replace('sorry', self.tactic, 1)
-            new_result = await check_lean_code(code, sorry_hammer=self.greedy)
+            new_result = await check_lean_code(code, json_output=json_output, sorry_hammer=self.greedy)
             if new_result['success']:
                 print ("SorryHammer succeeded")
                 output = "SorryHammer successfully replaced "
@@ -225,13 +226,13 @@ Alternatively, without setting the `sorry_hammer` flag, you could manually repla
                         code = self.imports + '\n' + code
                     code = 'import LeanTool.CheckFalse\n' + code
                     code = code.replace('sorry', f"(check_false {self.tactic})", 1)
-                    cf_result = await check_lean_code(code, sorry_hammer=False)
+                    cf_result = await check_lean_code(code, json_output=json_output, sorry_hammer=False)
                     if not cf_result['success']:
                         cf_out = "SorryHammer proved that the goal corresponding to the first sorry is false. The following is the proof of the negation:"
                         if isinstance(result['output'],str):
                             result['output']+='\n'+cf_out+'\n'+cf_result['output']
                         else:
-                            result['output']+=[{'data':output}]+cf_result['output']
+                            result['output']+=[{'data':cf_out}]+cf_result['output']
         return result
 
 
