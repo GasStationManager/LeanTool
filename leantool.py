@@ -179,7 +179,7 @@ class LoadSorry:
 
 class SorryHammer:
     def __init__(self, tactic = ['omega','hammer {disableAuto := true}'], imports = 'import Hammer\n', greedy=False):
-        self.tactic = tactic if isinstance(tactic, str) else "first | " + " | ".join(['('+t+')' for t in tactic])
+        self.tactic = tactic if isinstance(tactic, str) else "(first | " + " | ".join(['('+t+')' for t in tactic]) + ")"
         self.imports = imports
         self.greedy = greedy
         self.sys_msg = f"""
