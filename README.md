@@ -25,7 +25,7 @@ some reasoning models like Deepseek r1 and Gemini-2-flash-thinking.
 - Plugin system to allow optional features to be included at run time.
 - Flexible usage: as python library, as command-line chat interface, as OpenAI-compatible API server, or as [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server. Supports a wide range of coding assistants that can utilize custom OpenAI-compatible APIs and/or MCP servers, including Cursor, Aider, Cline, VS Code Agent Mode, Claude Code, and Gemini CLI.
 - Experimental Feature: property-based testing of subgoals, now avaiable as the MCP tool `run_tests`. See [blog](https://gasstationmanager.github.io/ai/2025/05/22/alphabeta-goose.html) [posts](https://gasstationmanager.github.io/ai/2025/06/08/proving-alphabeta.html) for details.  
-- Experimental Feature: the Sorry Hammer: automatically tries to prove each hole (`sorry`) with a hammer tactic (LeanHammer by default).
+- Experimental Feature: the Sorry Hammer: automatically tries to prove each hole (`sorry`) with a hammer tactic ([LeanHammer](https://github.com/JOSHCLUNE/LeanHammer) by default).
 
 ## API Server Demo
 
