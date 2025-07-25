@@ -23,7 +23,7 @@ This is part of a broader effort to create [safe and hallucination-free coding A
 to be used by models that do not yet support tool/function calls, including
 some reasoning models like Deepseek r1 and Gemini-2-flash-thinking.
 - Plugin system to allow optional features to be included at run time.
-- Flexible usage: as python library, as command-line chat interface, as OpenAI-compatible API server, or as [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server. Supports a wide range of coding assistants that can utilize custom OpenAI-compatible APIs and/or MCP servers, including Cursor, Aider, Cline, VS Code Agent Mode, and Claude Code.
+- Flexible usage: as python library, as command-line chat interface, as OpenAI-compatible API server, or as [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server. Supports a wide range of coding assistants that can utilize custom OpenAI-compatible APIs and/or MCP servers, including Cursor, Aider, Cline, VS Code Agent Mode, Claude Code, and Gemini CLI.
 - Experimental Feature: property-based testing of subgoals, now avaiable as the MCP tool `run_tests`. See [blog](https://gasstationmanager.github.io/ai/2025/05/22/alphabeta-goose.html) [posts](https://gasstationmanager.github.io/ai/2025/06/08/proving-alphabeta.html) for details.  
 - Experimental Feature: the Sorry Hammer: automatically tries to prove each hole (`sorry`) with a hammer tactic (LeanHammer by default).
 
@@ -128,7 +128,7 @@ aider --model openai/sonnet
 
 ## Model Context Protocol (MCP) Server
 - `leanmcp.py` is a [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server. This exports Lean (and plugins including load_sorry) as a [MCP tool](https://modelcontextprotocol.io/docs/concepts/tools), without the LLM and the feedback loop. Works with apps that can utilize MCP servers, and are able to manage the feedback loop within the app.
-  Has been tested to work with [Claude Code](https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview), Claude Desktop, [Cursor](https://www.cursor.com/), [VS Code Agent Mode](https://code.visualstudio.com/docs/copilot/chat/chat-agent-mode), and [Goose](https://github.com/block/goose).
+  Has been tested to work with [Claude Code](https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview), Claude Desktop, [Cursor](https://www.cursor.com/), [VS Code Agent Mode](https://code.visualstudio.com/docs/copilot/chat/chat-agent-mode), [Gemini CLI](https://github.com/google-gemini/gemini-cli), and [Goose](https://github.com/block/goose).
 - Note that the MCP tool does not come with the system messages that would be integrated in the Python library mode or the OpenAI-compatible API server mode. You may want to take some of the system messages in `leantool.py` relevant to your use case, and put it in the corresponding settings for your coding assistant, e.g. `CLAUDE.md` for Claude Code or the "Rules for AI" setting in Cursor. 
 - Can be run in `stdio` mode: e.g. when configuring your app for MCP, fill in the command `poetry run python leanmcp.py`
 - Can also serve over the network in `sse` mode: e.g. run `poetry run python leanmcp.py --sse --port 8008`,
