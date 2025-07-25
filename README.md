@@ -38,6 +38,11 @@ and API key as your API key for the chosen model. See below for specific set up 
 
 [http://ProvablyCorrectVibeCoding.com](http://ProvablyCorrectVibeCoding.com) is a web front end to LeanTool and [SafeVerify](https://github.com/GasStationManager/SafeVerify).  
 
+## Examples
+
+- [ArtificialAlgorithms](https://github.com/GasStationManager/ArtificialAlgorithms), a repository of verified algorithms, produced by AIs with help of tools including LeanTool
+- [examples/pabc_claude.lean](https://github.com/GasStationManager/LeanTool/blob/main/examples/pabc_claude.lean), re-proving some of the lemmas from Morph lab's recent [autoformalization of De Brujin's theorem](https://github.com/morph-labs/lean-abc-true-almost-always). 
+
 ## Installation
 
 - Install Lean. E.g. for Linux:
