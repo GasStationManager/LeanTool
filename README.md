@@ -133,7 +133,7 @@ aider --model openai/sonnet
 
 ## Model Context Protocol (MCP) Server
 - `leanmcp.py` is a [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server. This exports Lean (and plugins including load_sorry) as a [MCP tool](https://modelcontextprotocol.io/docs/concepts/tools), without the LLM and the feedback loop. Works with apps that can utilize MCP servers, and are able to manage the feedback loop within the app.
-  Has been tested to work with [Claude Code](https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview), Claude Desktop, [Cursor](https://www.cursor.com/), [VS Code Agent Mode](https://code.visualstudio.com/docs/copilot/chat/chat-agent-mode), [Gemini CLI](https://github.com/google-gemini/gemini-cli), and [Goose](https://github.com/block/goose).
+  Has been tested to work with [Claude Code](https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview), Claude Desktop, [Cursor](https://www.cursor.com/), [VS Code Agent Mode](https://code.visualstudio.com/docs/copilot/chat/chat-agent-mode), [Gemini CLI](https://github.com/google-gemini/gemini-cli), Cline, and [Goose](https://github.com/block/goose).
 - Note that the MCP tool does not come with the system messages that would be integrated in the Python library mode or the OpenAI-compatible API server mode. You may want to take some of the system messages in `leantool.py` relevant to your use case, and put it in the corresponding settings for your coding assistant, e.g. `CLAUDE.md` for Claude Code or the "Rules for AI" setting in Cursor. 
 - Can be run in `stdio` mode: e.g. when configuring your app for MCP, fill in the command `poetry run python leanmcp.py`
 - Can also serve over the network in `sse` mode: e.g. run `poetry run python leanmcp.py --sse --port 8008`,
@@ -154,6 +154,7 @@ aider --model openai/sonnet
     }
 }
 ```
+- If an MCP tool call hangs, try restarting the client (e.g. Cursor, Claude Desktop).
   
 ### Example Set Up with Claude Code
 
@@ -170,4 +171,4 @@ claude
   then in Cursor, go to `Cursor Settings > Features > MCP`, click on the `+ Add New MCP Server` button, and fill in the URL `http://<your-host-or-ip-address>:8008/sse`.
 - Test the set up. You may want to explicitly ask the LLM to use the tool in your prompt. If needed, add additional instructions in the [Rules for AI](https://docs.cursor.com/context/rules-for-ai) setting.
 - Example test prompt: "State a theorem in Lean 4 that n*(n+1) is even, for all natural numbers n. Write `sorry` in place of the proof. Pass the code to the provided tool to check for syntax, and show me its output". Cursor will show the MCP tool call; you may need to click the `Run tool` button to approve the call.
-- If a MCP tool call hangs, try restarting Cursor. This is potentially related to the issue documented [here](https://github.com/modelcontextprotocol/python-sdk/issues/423) and [here](https://github.com/getcursor/cursor/issues/2998).
+- If an MCP tool call hangs, try restarting Cursor. This is potentially related to the issue documented [here](https://github.com/modelcontextprotocol/python-sdk/issues/423) and [here](https://github.com/getcursor/cursor/issues/2998).
