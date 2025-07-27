@@ -154,7 +154,7 @@ aider --model openai/sonnet
     }
 }
 ```
-- If an MCP tool call hangs, try restarting the client (e.g. Cursor, Claude Desktop).
+- If an MCP tool call hangs, try restarting the client (e.g. Cursor, Claude Desktop); or if the client allows you to refresh/restart the connection to the MCP server, do that.
   
 ### Example Set Up with Claude Code
 
