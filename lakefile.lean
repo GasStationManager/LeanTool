@@ -8,10 +8,10 @@ package "LeanTool" where
   ]
   -- add any additional package configuration options here
 
-require Hammer from git "https://github.com/JOSHCLUNE/LeanHammer" @ "v4.21.0"
+require Hammer from git "https://github.com/JOSHCLUNE/LeanHammer" @ "v4.22.0"
 
 
-require "leanprover-community" / "mathlib" @ git "v4.21.0"
+require "leanprover-community" / "mathlib" @ git "v4.22.0"
 
 
 @[default_target]
