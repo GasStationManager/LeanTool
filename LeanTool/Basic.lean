@@ -2,7 +2,7 @@ import Lean.Elab.Command
 import Lean.Meta.Eval
 import Plausible.Gen
 import Plausible.Sampleable
- 
+
 
 open Plausible
 
@@ -13,18 +13,15 @@ open SampleableExt
 Print (at most) 10 samples of a given type to stdout for debugging.
 Output examples are separated by two newlines.
 -/
-def printSamples2 {t : Type u} [Repr t] (g : Gen t) : IO PUnit := do
--- TODO: this should be a global instance
-  letI : MonadLift Id IO := ⟨fun f => pure <| Id.run f⟩
-  do
-    -- we can't convert directly from `Rand (List t)` to `RandT IO (List Std.Format)`
-    -- (and `RandT IO (List t)` isn't type-correct without
-    -- https://github.com/leanprover/lean4/issues/3011), so go via an intermediate
-    let xs : List Std.Format ← Plausible.runRand <| Rand.down <| do
-      let xs : List t ← (List.range 10).mapM (ReaderT.run g ∘ ULift.up)
-      pure <| ULift.up (xs.map repr)
-    for x in xs do
-      IO.println s!"{x}\n"
+def printSamples2 {t : Type} [Repr t] (g : Gen t) : IO PUnit := do
+  let xs := List.range 10
+  for x in xs do
+    try
+      let y ← Gen.run g x
+      IO.println s!"{repr y}\n"
+    catch
+      | .userError msg => IO.println s!"{msg}\n"
+      | e => throw e
 
 
 open Lean Meta Elab
@@ -51,8 +48,8 @@ private def mkGenerator (e : Expr) : MetaM (Level × Expr × Expr × Expr) := do
 elab "#samplenl " e:term : command =>
   Command.runTermElabM fun _ => do
     let e ← Elab.Term.elabTermAndSynthesize e none
-    let ⟨u, α, repr, gen⟩ ← mkGenerator e
-    let printSamples := mkApp3 (mkConst ``printSamples2 [u]) α repr gen
+    let ⟨_, α, repr, gen⟩ ← mkGenerator e
+    let printSamples := mkApp3 (mkConst ``printSamples2 []) α repr gen
     let code ← unsafe evalExpr (IO PUnit) (mkApp (mkConst ``IO) (mkConst ``PUnit [1])) printSamples
     _ ← code
 
