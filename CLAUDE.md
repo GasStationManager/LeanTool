@@ -4,7 +4,7 @@
 
 - MCP tool check_lean that takes Lean 4 source code and checks it with the Lean executable
 - pbtdp.py: command-line script, takes a filename containing Lean source code and a function signature, generate sample inputs and evaluates the function on those inputs.
-  Usage: `poetry run python pbtdp.py <filename> <function signature> [--num_test=N]`
+  Usage: `uv run python pbtdp.py <filename> <function signature> [--num_test=N]`
 
 
 # Development workflow
@@ -38,7 +38,7 @@
 2. **Property-based testing with pbtdp.py**
    - Pass the complete function signature including proof arguments:
      ```
-     poetry run python pbtdp.py <filename> "<function> (arg1: Type1) (arg2: Type2) (proof1: P1) (proof2: P2)" --num_test=N
+     uv run python pbtdp.py <filename> "<function> (arg1: Type1) (arg2: Type2) (proof1: P1) (proof2: P2)" --num_test=N
      ```
    - The script handles generating test cases and proof terms for the arguments
    - Default is 5 test cases, increase with `--num_test=N` for better coverage
