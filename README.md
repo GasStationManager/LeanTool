@@ -45,21 +45,18 @@ and API key as your API key for the chosen model. See below for specific set up 
 
 ## Installation
 
-- Install Lean. E.g. for Linux:
+- Install elan (Lean version manager, includes `lake`). E.g. for Linux/macOS:
 ```
 curl https://raw.githubusercontent.com/leanprover/elan/master/elan-init.sh -sSf | sh
+source ~/.elan/env  # or restart your shell
 ```
-- Install `poetry`
+- Install [uv](https://docs.astral.sh/uv/getting-started/installation/)
 - Clone the repository
-- Install [Pantograph](https://github.com/lenianiva/PyPantograph/) by following its instructions. Create the wheel file. E.g.
+- Install Python dependencies (including [Pantograph](https://github.com/stanford-centaur/PyPantograph/)):
 ```
-git clone --recurse-submodules https://github.com/stanford-centaur/PyPantograph.git
-cd PyPantograph
-uv build
+uv sync
 ```
-- Modify `pyproject.toml` in the LeanTool directory, to ensure the `pantograph` entry points to the correct path and file name to the `.whl` file.
-- `poetry install`
-- Install Mathlib and other Lean dependencies, e.g.
+- Install Mathlib and other Lean dependencies:
 ```
 lake exe cache get
 lake update
@@ -80,7 +77,7 @@ and [WakingUp](https://github.com/GasStationManager/WakingUp) experiments on hal
 - *Plugins* are optional features that users can choose to include at run time. There are a few built-in ones, but you can also implement your own and pass to the `interactive_lean_check` call. Here is a tentative interface design. A plugin is a python object that has the following members:
   - `sys_msg`: a string that will be attached to the system message
   - `async def process(self, code, result)`: a method that will be executed after the main Lean executable finishes. Takes in the LLM submitted code, and result a dict that records the results of the processing so far. The method should return the new result dict. 
-- `cli_chat.py` command line chat interface. Simply run `poetry run python cli_chat.py`.
+- `cli_chat.py` command line chat interface. Simply run `uv run python cli_chat.py`.
 - `app.py` Streamlit chat interface.
 
 ## OpenAI-compatible Proxy Server
@@ -95,7 +92,7 @@ and coding assistants [Continue](https://www.continue.dev/), [Cline](https://cli
 
 - After the Installation steps above, the following command will launch the API server at `http://localhost:8000/v1`:
 ```
-poetry run python lean-api-server-flask.py
+uv run python lean-api-server-flask.py
 ```
 
 - Install [OpenWebUI](https://openwebui.com/). If you go with the docker option, you will need to install docker first.
@@ -135,8 +132,8 @@ aider --model openai/sonnet
 - `leanmcp.py` is a [Model Context Protocol (MCP)](https://modelcontextprotocol.io/) server. This exports Lean (and plugins including load_sorry) as a [MCP tool](https://modelcontextprotocol.io/docs/concepts/tools), without the LLM and the feedback loop. Works with apps that can utilize MCP servers, and are able to manage the feedback loop within the app.
   Has been tested to work with [Claude Code](https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview), Claude Desktop, [Cursor](https://www.cursor.com/), [VS Code Agent Mode](https://code.visualstudio.com/docs/copilot/chat/chat-agent-mode), [Gemini CLI](https://github.com/google-gemini/gemini-cli), Cline, and [Goose](https://github.com/block/goose).
 - Note that the MCP tool does not come with the system messages that would be integrated in the Python library mode or the OpenAI-compatible API server mode. You may want to take some of the system messages in `leantool.py` relevant to your use case, and put it in the corresponding settings for your coding assistant, e.g. `CLAUDE.md` for Claude Code or the "Rules for AI" setting in Cursor. 
-- Can be run in `stdio` mode: e.g. when configuring your app for MCP, fill in the command `poetry run python leanmcp.py`
-- Can also serve over the network in `sse` mode: e.g. run `poetry run python leanmcp.py --sse --port 8008`,
+- Can be run in `stdio` mode: e.g. when configuring your app for MCP, fill in the command `uv run python leanmcp.py`
+- Can also serve over the network in `sse` mode: e.g. run `uv run python leanmcp.py --sse --port 8008`,
   then fill in the URL `http://<your-host-or-ip-address>:8008/sse` in your app's configuration.
 - You can use tools like [Supergateway](https://github.com/supercorp-ai/supergateway) to convert between the two modes, in order to connect to apps that only support one mode. E.g. if you are serving the MCP server in `sse` mode, but wants Claude Desktop (which only supports `stdio`) to connect to it, you can install configure Claude Desktop's MCP with
 ```
@@ -161,13 +158,12 @@ aider --model openai/sonnet
 - Install [Claude Code](https://docs.anthropic.com/en/docs/agents-and-tools/claude-code/overview)
 - Add leanmcp.py as an mcp server. e.g. in the LeanTool repo directory:
 ```
-claude mcp add LeanTool poetry run python leanmcp.py
-poetry shell
-claude  
+claude mcp add LeanTool uv run python leanmcp.py
+claude
 ```
 
 ### Example Set Up with Cursor
-- Set up the MCP server in Cursor, see [instructions](https://docs.cursor.com/context/model-context-protocol). E.g. for `sse` mode,  run the server with `poetry run python leanmcp.py --sse --port 8008`,
+- Set up the MCP server in Cursor, see [instructions](https://docs.cursor.com/context/model-context-protocol). E.g. for `sse` mode,  run the server with `uv run python leanmcp.py --sse --port 8008`,
   then in Cursor, go to `Cursor Settings > Features > MCP`, click on the `+ Add New MCP Server` button, and fill in the URL `http://<your-host-or-ip-address>:8008/sse`.
 - Test the set up. You may want to explicitly ask the LLM to use the tool in your prompt. If needed, add additional instructions in the [Rules for AI](https://docs.cursor.com/context/rules-for-ai) setting.
 - Example test prompt: "State a theorem in Lean 4 that n*(n+1) is even, for all natural numbers n. Write `sorry` in place of the proof. Pass the code to the provided tool to check for syntax, and show me its output". Cursor will show the MCP tool call; you may need to click the `Run tool` button to approve the call.
