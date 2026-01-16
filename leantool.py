@@ -335,7 +335,7 @@ async def interactive_lean_check(
                 txt=f.read()
             messages.append({
                 "role": "user",
-                "content": f"The following is the conent of the file '{fn}':\n{txt}"
+                "content": f"The following is the content of the file '{fn}':\n{txt}"
             })
         #prompt caching
         messages[-1]['cache_control']={'type': 'ephemeral'}
